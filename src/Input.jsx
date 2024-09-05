@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import colornames from 'colornames';
 import Fuse from 'fuse.js';
 import colorNames from './Colornames';
+
 const fuse = new Fuse(colorNames, {
   includeScore: true,
   threshold: 0.4,
@@ -16,19 +17,31 @@ const getSuggestions = (input) => {
 const Input = ({ colorValue, setColorValue, setHexValue, setIsDarkText }) => {
   const [suggestions, setSuggestions] = useState([]);
 
+  // Initialize colorValue from local storage on component mount
+  useEffect(() => {
+    const savedColor = localStorage.getItem('colorValue');
+    if (savedColor) {
+      setColorValue(savedColor);
+      setHexValue(colornames(savedColor) || '');
+    }
+  }, [setColorValue, setHexValue]);
+
+  // Save colorValue to local storage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('colorValue', colorValue);
+    setHexValue(colornames(colorValue) || '');
+  }, [colorValue, setHexValue]);
+
   const handleChange = useCallback((e) => {
     const value = e.target.value;
     setColorValue(value);
-    
     setSuggestions(getSuggestions(value));
-    setHexValue(colornames(value) || ''); 
-  }, [setColorValue, setHexValue]);
+  }, [setColorValue]);
 
   const handleSuggestionClick = useCallback((name) => {
     setColorValue(name);
-    setHexValue(colornames(name) || ''); 
     setSuggestions([]);
-  }, [setColorValue, setHexValue]);
+  }, [setColorValue]);
 
   return (
     <form onSubmit={(e) => e.preventDefault()}>
@@ -49,18 +62,17 @@ const Input = ({ colorValue, setColorValue, setHexValue, setIsDarkText }) => {
       >
         Toggle Text Color
       </button>
-       <li className='suggestion-li'>
-          {suggestions.length > 0 && (
-            <ul className="suggestions-list">
-              {suggestions.map((name, index) => (
-                <li key={index} onClick={() => handleSuggestionClick(name)}>
-                  {name}
-                </li>
-              ))}
-            </ul>
-          )}
-       </li>
-      
+      <li className='suggestion-li'>
+        {suggestions.length > 0 && (
+          <ul className="suggestions-list">
+            {suggestions.map((name, index) => (
+              <li key={index} onClick={() => handleSuggestionClick(name)}>
+                {name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </li>
     </form>
   );
 };
