@@ -17,7 +17,6 @@ const getSuggestions = (input) => {
 const Input = ({ colorValue, setColorValue, setHexValue, setIsDarkText }) => {
   const [suggestions, setSuggestions] = useState([]);
 
-  // Initialize colorValue from local storage on component mount
   useEffect(() => {
     const savedColor = localStorage.getItem('colorValue');
     if (savedColor) {
@@ -26,7 +25,6 @@ const Input = ({ colorValue, setColorValue, setHexValue, setIsDarkText }) => {
     }
   }, [setColorValue, setHexValue]);
 
-  // Save colorValue to local storage whenever it changes
   useEffect(() => {
     localStorage.setItem('colorValue', colorValue);
     setHexValue(colornames(colorValue) || '');
